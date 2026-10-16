@@ -1,9 +1,6 @@
 # PyStolA
 Simple automaton simulator project
 
-
-
-
 * Sobre o venv:
 
     1. Criando um diretório venv:
@@ -20,6 +17,8 @@ Simple automaton simulator project
 * O script mais promissor até então é o "testCombinehtml.py"
     Já sendo capaz de gerar o automato em uma pagina html e ser capaz de testar palavras..
 
+
+--------------------------------------------------------------------------------------------------
 
 
 

@@ -1,10 +1,12 @@
- gcc main.c -o app -llua -lraylib -lm -ldl -lpthread
-./app
+# gcc main.c -o app -llua -lraylib -lm -ldl -lpthread
+#./app
+# gcc test.c fun.c -o test_app -llua -lraylib -lm -ldl -lpthread
+# gcc main.c fun.c -o app -llua -lraylib -lm -ldl -lpthread
 
- # Compilador, opções de compilação, bibliotecas e nome do executável
+# Compilador, opções de compilação, bibliotecas e nome do executável
 CC = gcc
-CFLAGS = -Wall -Wextra -pedantic -std=c99 -MMD -MP
-LIBS = -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+CFLAGS = -Wall -Wextra -pedantic -std=c99 -MMD -MP -g -fsanitize=address,undefined
+LIBS = -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -llua -fsanitize=address,undefined 
 TARGET = mamilo
 
 # Arquivos fonte do projeto e seus objetos correspondentes
