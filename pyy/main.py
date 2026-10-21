@@ -1,9 +1,6 @@
 from tkinter import *
 from tkinter import ttk
 
-root = Tk()
-drawCanvas = Canvas(root)
-drawCanvas.pack()
 
 class automaton:
     #Estados espera lista de estados, onde cada estado é um trio ordenado com [str nome, int coord x, int coord y]
@@ -16,10 +13,11 @@ class automaton:
     eInicial: str 
     eFinais = []
 
+    def add_estados(): 
+
     
 def printAut(a : automaton):
     """Essa função deve receber um objeto automaton e uma palavra, retornando booleano caso a palavra seja reconhecida pelo automato"""
-    
     print("Alfabeto reconhecido:")
     print(a.alfabeto)
     print("estados:")
@@ -32,8 +30,7 @@ def printAut(a : automaton):
     print("Estados finais:")
     print(a.eFinais)
 
-
-def initAut(a : automaton):
+#def initAut(a : automaton):
 
 
 
@@ -46,6 +43,14 @@ def create_circle(x, y, r, canvas): #center coordinates, radius
     x1 = x + r
     y1 = y + r
     return canvas.create_oval(x0, y0, x1, y1)
+
+# ---------------------------------------------------------------------
+
+root = Tk()
+drawCanvas = Canvas(root)
+drawCanvas.pack()
+
+
 
 a1 = automaton()
 

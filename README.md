@@ -1,4 +1,13 @@
 # PyStolA
+
+
+
+
+-> Today (21/10/2026) made some guud first steps in object-orienting the things in python, mainly in the newly created "lugu.py"
+
+
+--------------------------------------------------------------------------------------------------
+
 Simple automaton simulator project
 
 * Sobre o venv:
@@ -19,6 +28,7 @@ Simple automaton simulator project
 
 
 --------------------------------------------------------------------------------------------------
+
 
 
 
