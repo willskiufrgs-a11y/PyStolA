@@ -2,10 +2,20 @@
 
 
 
+-> Today (22/10/2026):
 
+The thing started gaining shape, will keep the classes to both hold the info about automanton networks, nodes and edges, but also their canvas drawing methods, this way, say, a node instance hold the canvas_tag id of its circle and text, so that it is easy to manipulate it later while using canvas instead of widgets...
+
+* Next steps are to do similar work to edges
+* then work on functions such as move, delete, rename and such
+* A frame holding the (toggle) buttons (buttons to toggle insert node mode, insert edge, remove, move, etc.)
+* a region that holds the automaton network information, such as its characters, number of nodes, etc.
+* later stuff that tests if a word is recognized by automaton....
+
+** Need to add license!
+
+--------------------------------------------------------------------------------------------------
 -> Today (21/10/2026) made some guud first steps in object-orienting the things in python, mainly in the newly created "lugu.py"
-
-
 --------------------------------------------------------------------------------------------------
 
 Simple automaton simulator project
