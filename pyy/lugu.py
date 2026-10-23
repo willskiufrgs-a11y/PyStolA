@@ -6,6 +6,8 @@ class Node:
         self.name = name
         self.is_final = is_final
         self.canvas = canvas
+        self.x = x
+        self.y = y
 
         radius = 30
         self.oval_id = canvas.create_oval( x - radius, y - radius, x + radius, y + radius, fill="lightblue", outline="black") 
@@ -27,10 +29,11 @@ class stack_toes(au_toma_toes):
 
 
 class Edge:
-    def __init__(self, from_state: Node, to_state: Node, from_tape: str):
+    def __init__(self, from_state: Node, to_state: Node, from_tape: list[char], canvas):
         self.from_state = from_state
         self.to_state = to_state
         self.from_tape = from_tape
+        self.arrow_id = canvas.create_line(self.from_state.x,self.from_state.y,self.to_state.x,self.to_state.y,arrow=tk.LAST)
 
 class Edge_stack(Edge):
     def __init__(self, from_state: Node, to_state: Node, from_tape: str, from_stack: str):
@@ -39,13 +42,29 @@ class Edge_stack(Edge):
 
 
 
+def kill_node(event, canvas, n: node, toes: au_toma_toes):
+    canvas.delete(n.oval_id)
+    canvas.delete(n.text_id)
+    toes.nodes.remove(n)
+
 
 def draw_node(event,canvas,toes: au_toma_toes):
+    radius = 60
+    X = event.x
+    Y = event.y
+    tmp_node = Node("q" + str(len(toes.nodes)),False,X,Y,canvas)
+    toes.nodes.append(tmp_node)
+    canvas.tag_bind(tmp_node.oval_id,'<Button-3>', lambda event, n=tmp_node, canvas=canvas, toes=toes: kill_node(event, canvas, n, toes)) 
+    canvas.tag_bind(tmp_node.text_id,'<Button-3>', lambda event, n=tmp_node, canvas=canvas, toes=toes: kill_node(event, canvas, n, toes)) 
+                    
+
+def draw_edge(event,canvas,node: Node, toes: au_toma_toes, start: bool):
     print(f"Clicked at: {event.x}, {event.y}")  # <-- Add this!
     radius = 60
     X = event.x
     Y = event.y
-    toes.nodes.append(Node("q" + str(len(toes.nodes)),False,X,Y,canvas))
+    tmp_edge = Edge()
+    toes.edges.append(tmp_node)
 
 
 # ------------------------- MAIN()
@@ -61,6 +80,8 @@ main_toe = au_toma_toes()
 
 
 drawCanvas.bind('<Button-1>',lambda event:draw_node(event,drawCanvas,main_toe))
+drawCanvas.tag_bind(tmp_node.oval_id,'<Button-1>', lambda event, n=tmp_node, canvas=canvas, toes=toes: draw_edge(event, canvas, n, toes,True)) 
+drawCanvas.tag_bind(tmp_node.oval_id,'<B1-Motion>', lambda event, n=tmp_node, canvas=canvas, toes=toes: kill_node(event, canvas, n, toes)) 
 
 
 
