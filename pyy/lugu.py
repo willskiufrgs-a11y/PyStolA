@@ -1,17 +1,20 @@
 from tkinter import *
 from tkinter import ttk
+class Global:
+    id_counter = 0
 
 class Node:
-    def __init__(self,name: str, is_final: bool, x,y, canvas):
+    def __init__(self,name: str, is_final: bool, x,y, canvas, ID):
         self.name = name
         self.is_final = is_final
         self.canvas = canvas
         self.x = x
         self.y = y
+        self.id = ID
 
         radius = 30
-        self.oval_id = canvas.create_oval( x - radius, y - radius, x + radius, y + radius, fill="lightblue", outline="black") 
-        self.text_id = canvas.create_text( x,y,text=name,font=("Arial",10,"bold"))
+        self.oval_id = canvas.create_oval( x - radius, y - radius, x + radius, y + radius, fill="lightblue", outline="black", tags=("node",ID)) 
+        self.text_id = canvas.create_text( x,y,text=name,font=("Arial",10,"bold"),tags=("node",ID))
 
 class au_toma_toes: 
     def __init__(self):
@@ -48,14 +51,15 @@ def kill_node(event, canvas, n: node, toes: au_toma_toes):
     toes.nodes.remove(n)
 
 
-def draw_node(event,canvas,toes: au_toma_toes):
+def draw_node(event,canvas,toes: au_toma_toes, Global):
     radius = 60
     X = event.x
     Y = event.y
-    tmp_node = Node("q" + str(len(toes.nodes)),False,X,Y,canvas)
+    tmp_node = Node("q" + str(len(toes.nodes)),False,X,Y,canvas,Global.id_counter)
     toes.nodes.append(tmp_node)
     canvas.tag_bind(tmp_node.oval_id,'<Button-3>', lambda event, n=tmp_node, canvas=canvas, toes=toes: kill_node(event, canvas, n, toes)) 
     canvas.tag_bind(tmp_node.text_id,'<Button-3>', lambda event, n=tmp_node, canvas=canvas, toes=toes: kill_node(event, canvas, n, toes)) 
+    Global.id_counter = Global.id_counter + 1
                     
 
 def draw_edge(event,canvas,node: Node, toes: au_toma_toes, start: bool):
@@ -67,21 +71,32 @@ def draw_edge(event,canvas,node: Node, toes: au_toma_toes, start: bool):
     toes.edges.append(tmp_node)
 
 
+def event_decider(event,canvas):
+    clicked_on = canvas.find_withtag("current")
+    print(clicked_on)
+    tagg = canvas.gettags(clicked_on)
+    print(tagg)
+
+
+
+
 # ------------------------- MAIN()
 root = Tk()
 drawCanvas = Canvas(root,height=500,width=500,bd=5,relief=GROOVE)
 drawCanvas.pack()
+global_class = Global()
 #btn_add_node = Button(root,text="insert node",command=draw_node(drawCanvas,root.winfo_pointerx(),root.winfo_pointery(), 50))
 #btn_add_node.pack()
 
 main_toe = au_toma_toes()
 
+drawCanvas.bind('<Button-1>',lambda event:draw_node(event,drawCanvas,main_toe,global_class))
+
+drawCanvas.bind('<Button-2>', lambda event: event_decider(event,drawCanvas))
 
 
-
-drawCanvas.bind('<Button-1>',lambda event:draw_node(event,drawCanvas,main_toe))
-drawCanvas.tag_bind(tmp_node.oval_id,'<Button-1>', lambda event, n=tmp_node, canvas=canvas, toes=toes: draw_edge(event, canvas, n, toes,True)) 
-drawCanvas.tag_bind(tmp_node.oval_id,'<B1-Motion>', lambda event, n=tmp_node, canvas=canvas, toes=toes: kill_node(event, canvas, n, toes)) 
+#drawCanvas.tag_bind(tmp_node.oval_id,'<Button-1>', lambda event, n=tmp_node, canvas=canvas, toes=toes: draw_edge(event, canvas, n, toes,True)) 
+#drawCanvas.tag_bind(tmp_node.oval_id,'<B1-Motion>', lambda event, n=tmp_node, canvas=canvas, toes=toes: kill_node(event, canvas, n, toes)) 
 
 
 
