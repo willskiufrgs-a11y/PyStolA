@@ -32,6 +32,13 @@ class au_toma_toes:
                 return node
         return None
 
+    def edge_finder(self,edge_id):
+        for edge in self.edges:
+            if edge.id == edge_id:
+                return edge
+        return None
+
+
 class stack_toes(au_toma_toes):
     def __init__(self):
         super().__init__()
@@ -55,11 +62,12 @@ def get_points(node1,node2,toe,Global):
     return [x1,y1,x2,y2]
 
 class Edge:
-    def __init__(self, from_state: Node, to_state: Node,canvas, from_tape: list[char],coords):
+    def __init__(self, from_state: Node, to_state: Node,canvas, from_tape: list[char],coords,ID):
         self.from_state = from_state
         self.to_state = to_state
         self.from_tape = from_tape
-        self.arrow_id = canvas.create_line(coords[0],coords[1],coords[2],coords[3],width=3,arrow=LAST)
+        self.id = ID
+        self.arrow_id = canvas.create_line(coords[0],coords[1],coords[2],coords[3],width=3,arrow=LAST,tags=("edge",ID))
 
 class Edge_stack(Edge):
     def __init__(self, from_state: Node, to_state: Node, from_tape: str, from_stack: str):
@@ -68,10 +76,18 @@ class Edge_stack(Edge):
 
 
 
-def kill_node(event, canvas, n: node, toes: au_toma_toes):
+def kill_edge(canvas, edge, toes):
+    canvas.delete(edge.arrow_id)
+    toes.edges.remove(edge)
+
+def kill_node(canvas, n: Node, toes: au_toma_toes):
+    for edge in toes.edges[:]:
+        if edge.from_state.id == n.id or edge.to_state.id == n.id:
+            kill_edge(canvas, edge, toes)
     canvas.delete(n.oval_id)
     canvas.delete(n.text_id)
     toes.nodes.remove(n)
+    
 
 
 def draw_node(event,canvas,toes: au_toma_toes, Global):
@@ -80,25 +96,28 @@ def draw_node(event,canvas,toes: au_toma_toes, Global):
     Y = event.y
     tmp_node = Node("q" + str(len(toes.nodes)),False,X,Y,canvas,Global.id_counter,Global.radius)
     toes.nodes.append(tmp_node)
-    canvas.tag_bind(tmp_node.oval_id,'<Button-3>', lambda event, n=tmp_node, canvas=canvas, toes=toes: kill_node(event, canvas, n, toes)) 
-    canvas.tag_bind(tmp_node.text_id,'<Button-3>', lambda event, n=tmp_node, canvas=canvas, toes=toes: kill_node(event, canvas, n, toes)) 
     Global.id_counter = Global.id_counter + 1
                     
 
 def draw_edge(node_start: Node,node_end: Node,canvas, toes: au_toma_toes, Global):
-    #print(f"Clicked at: {event.x}, {event.y}")  # <-- Add this!
     radius = Global.radius
     coords = get_points(node_start,node_end,toes,Global)
-    tmp_edge = Edge(node_start,node_end,canvas,["a","b"],coords)
+    tmp_edge = Edge(toes.node_finder(node_start[1]),toes.node_finder(node_end[1]),canvas,["a","b"],coords,Global.id_counter)
     toes.edges.append(tmp_edge)
+    Global.id_counter = Global.id_counter + 1
 
 
-def thing_finder(event,canvas):
+def tag_finder(event,canvas):
+    """
+    Given an event and canvas of origin, return a list with node tag and node id
+    """
     clicked_on = canvas.find_withtag("current")
     for item in reversed(clicked_on):
         tagg = canvas.gettags(clicked_on)
         if "tmp_edge" in tagg:
             continue
+        if "edge" in tagg:
+            return [tagg[0],int(tagg[1])]
         if "node" in tagg:
             return [tagg[0],int(tagg[1])]
     return None
@@ -109,7 +128,7 @@ class mouse_class:
             "start_x": 0,  
             "start_y": 0, 
             "is_dragging": False,
-            "source_node": ["none",0],
+            "source_tag": ["none",0],
             "tmp_edge": None
         }
 
@@ -119,18 +138,18 @@ class mouse_class:
         self.ctx["start_x"] = X
         self.ctx["start_y"] = Y
         self.ctx["is_dragging"] = False
-        thing = thing_finder(event,canvas)
-        self.ctx["source_node"] = thing
+        thing = tag_finder(event,canvas)
+        self.ctx["source_tag"] = thing
         #print(thing)
 
     def on_drag(self, event, canvas, toes): 
-        if self.ctx["source_node"]:
+        if self.ctx["source_tag"]:
             X = event.x
             Y = event.y
             dx = self.ctx["start_x"] - X
             dy = self.ctx["start_y"] - Y
             dist = ((dx ** 2) + (dy ** 2)) ** (1/2)
-            if (dist > 4 and self.ctx["source_node"][0] == "node") :
+            if (dist > 4 and self.ctx["source_tag"][0] == "node") :
                 self.ctx["is_dragging"] = True
                 if not self.ctx["tmp_edge"]:
                     self.ctx["tmp_edge"] = canvas.create_line(self.ctx["start_x"],self.ctx["start_y"], X,Y, arrow=LAST, fill="red", width=4,tags=("tmp_edge",))
@@ -148,17 +167,26 @@ class mouse_class:
         self.ctx["tmp_edge"] = None
         self.ctx["is_dragging"] = False
         canvas.update_idletasks()
-        current = thing_finder(event,canvas) 
+        current = tag_finder(event,canvas) 
         print(current)
-        if not self.ctx["source_node"]:
+        if not self.ctx["source_tag"]:
             if not current:
                 draw_node(event,canvas,toes,Global) 
         else:
-            if self.ctx["source_node"][0] == "node":
+            if self.ctx["source_tag"][0] == "node":
                 if current:
                     if current[0] == "node":
-                        if current[1] != self.ctx["source_node"][1]:
-                            draw_edge(self.ctx["source_node"],current,canvas,toes,Global)
+                        if current[1] != self.ctx["source_tag"][1]:
+                            draw_edge(self.ctx["source_tag"],current,canvas,toes,Global)
+
+
+    def on_r_click(self,event,canvas,toes):
+        current = tag_finder(event,canvas)
+        if current:
+            if current[0] == "node":
+                kill_node(canvas,toes.node_finder(current[1]),toes)
+            if current[0] == "edge":
+                kill_edge(canvas,toes.edge_finder(current[1]),toes)
 
 
 
@@ -180,9 +208,12 @@ drawCanvas.bind('<ButtonPress-1>',lambda event:mouseThing.on_click(event,drawCan
 drawCanvas.bind('<B1-Motion>',lambda event:mouseThing.on_drag(event,drawCanvas,main_toe))
 drawCanvas.bind('<ButtonRelease-1>',lambda event:mouseThing.on_release(event,drawCanvas,main_toe,global_class))
 
+
+drawCanvas.bind('<Button-3>',lambda event:mouseThing.on_r_click(event,drawCanvas,main_toe))
+
 #drawCanvas.bind('<Button-1>',lambda event:draw_node(event,drawCanvas,main_toe,global_class))
 
-drawCanvas.bind('<Button-2>', lambda event: thing_finder(event,drawCanvas))
+drawCanvas.bind('<Button-2>', lambda event: print(tag_finder(event,drawCanvas)))
 
 
 #drawCanvas.tag_bind(tmp_node.oval_id,'<Button-1>', lambda event, n=tmp_node, canvas=canvas, toes=toes: draw_edge(event, canvas, n, toes,True)) 

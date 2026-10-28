@@ -1,6 +1,15 @@
 # PyStolA
 
 
+-> Today (28/10/2026) [madrugada]:
+
+Adicionando a opção de deletar edges, juntamente com as edges conectadas a um nodo caso esse seja removido.
+
+* CONFUSÃO: o output do thing_finder é algo do tipo ['node', id], mas as vezes isso se confunde com node_obj de modo que estava guardando a lista ao invez do node_obj em toes.
+
+* Caso queira fazer diferenciações de tags entre node e node_text, basta modificar as tags...
+
+--------------------------------------------------------------------------------------------------
 
 -> Today (22/10/2026):
 
