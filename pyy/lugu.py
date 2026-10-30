@@ -61,6 +61,9 @@ def get_points(node1,node2,toe,Global):
     y2 = N2.y + b
     return [x1,y1,x2,y2]
 
+def tapeCat(from_tape: list[str]) -> str:
+    return ", ".join(from_tape)
+
 class Edge:
     def __init__(self, from_state: Node, to_state: Node,canvas, from_tape: list[char],coords,ID):
         self.from_state = from_state
@@ -68,6 +71,7 @@ class Edge:
         self.from_tape = from_tape
         self.id = ID
         self.arrow_id = canvas.create_line(coords[0],coords[1],coords[2],coords[3],width=3,arrow=LAST,tags=("edge",ID))
+        self.text_id = canvas.create_text( (coords[0] + coords[2]) / 2,(coords[1] + coords[3]) / 2,text=tapeCat(from_tape),font=("Arial",20,"bold"),tags=("edge",ID),fill="red")
 
 class Edge_stack(Edge):
     def __init__(self, from_state: Node, to_state: Node, from_tape: str, from_stack: str):
@@ -78,6 +82,7 @@ class Edge_stack(Edge):
 
 def kill_edge(canvas, edge, toes):
     canvas.delete(edge.arrow_id)
+    canvas.delete(edge.text_id)
     toes.edges.remove(edge)
 
 def kill_node(canvas, n: Node, toes: au_toma_toes):
@@ -198,26 +203,25 @@ class mouse_class:
 root = Tk()
 drawCanvas = Canvas(root,height=500,width=500,bd=5,relief=GROOVE)
 drawCanvas.pack()
-global_class = Global()
-#btn_add_node = Button(root,text="insert node",command=draw_node(drawCanvas,root.winfo_pointerx(),root.winfo_pointery(), 50))
-#btn_add_node.pack()
-main_toe = au_toma_toes()
 
+global_class = Global()
+main_toe = au_toma_toes()
 mouseThing = mouse_class()
+
 drawCanvas.bind('<ButtonPress-1>',lambda event:mouseThing.on_click(event,drawCanvas,main_toe,global_class))
 drawCanvas.bind('<B1-Motion>',lambda event:mouseThing.on_drag(event,drawCanvas,main_toe))
 drawCanvas.bind('<ButtonRelease-1>',lambda event:mouseThing.on_release(event,drawCanvas,main_toe,global_class))
-
-
 drawCanvas.bind('<Button-3>',lambda event:mouseThing.on_r_click(event,drawCanvas,main_toe))
-
-#drawCanvas.bind('<Button-1>',lambda event:draw_node(event,drawCanvas,main_toe,global_class))
 
 drawCanvas.bind('<Button-2>', lambda event: print(tag_finder(event,drawCanvas)))
 
+Framester = Frame(root, relief="sunken")
+Framester.pack()
+lubul = Label(Framester, text="luguseima")
+lubul.pack()
 
-#drawCanvas.tag_bind(tmp_node.oval_id,'<Button-1>', lambda event, n=tmp_node, canvas=canvas, toes=toes: draw_edge(event, canvas, n, toes,True)) 
-#drawCanvas.tag_bind(tmp_node.oval_id,'<B1-Motion>', lambda event, n=tmp_node, canvas=canvas, toes=toes: kill_node(event, canvas, n, toes)) 
+#tabela_tran = 
+
 
 
 
