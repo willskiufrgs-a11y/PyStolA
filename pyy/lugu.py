@@ -272,6 +272,9 @@ class Selected:
         self.arrow_id = self.canvas.create_line(self.toes.edge_finder(self.tagV[1]).coords[0],self.toes.edge_finder(self.tagV[1]).coords[1],self.toes.edge_finder(self.tagV[1]).coords[2],self.toes.edge_finder(self.tagV[1]).coords[3],width=5,arrow=LAST,tags=("selected_edge"),fill="orange")
         for index, character in enumerate(self.toes.edge_finder(self.tagV[1]).from_tape):
             self.edge_field.insert(index,character)
+
+
+
     
     def delete_selected(self):
         if self.oval_id:
@@ -316,7 +319,7 @@ botton_frame.pack()
 edge_button = Button(botton_frame, text="Modificar Seta",font=("Arial",14,"bold"), relief=RAISED, bd=3,bg="lightyellow" )
 edge_button.pack()
 
-edge_entry = Entry(botton_frame)
+edge_entry = Entry(botton_frame,font=("arial",14,"bold"))
 edge_entry.pack()
 
 
