@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import ttk
+import math
 class Global:
     id_counter = 0
     radius = 30
@@ -7,23 +8,48 @@ class Global:
     
 
 class Node:
-    def __init__(self,name: str, is_final: bool, x,y, canvas, ID,radius):
+    def __init__(self,name: str, is_final: bool, x,y, canvas, ID,radius,toes):
         self.name = name
         self.is_final = is_final
         self.canvas = canvas
         self.x = x
         self.y = y
         self.id = ID
-        radius
+        self.radius = radius
         self.oval_id = canvas.create_oval( x - radius, y - radius, x + radius, y + radius, fill="lightblue", outline="black", tags=("node",ID)) 
         self.text_id = canvas.create_text( x,y,text=name,font=("Arial",10,"bold"),tags=("node",ID))
+        self.start_arrow_id = None
+        self.end_oval_id = None
+        self.toes = toes
+
+    def toggle_start(self):
+        if not self.toes.start:
+            self.start_arrow_id = self.canvas.create_line(self.x - 1.3 * self.radius, self.y - 1.3 * self.radius,self.x + self.radius * math.cos(3*math.pi/4),self.y - self.radius * math.sin(3*math.pi/4),width=5,arrow=LAST,tags=("start_edge",self.id))
+            self.toes.start = self
+        else:
+            if self.toes.start == self:
+                self.canvas.delete(self.start_arrow_id)
+                self.start_arrow_id = None
+                self.toes.start = None
+
+    def toggle_end(self):
+        if not self in self.toes.final:
+            self.end_oval_id = self.canvas.create_oval( self.x - self.radius + 5, self.y - self.radius + 5, self.x + self.radius - 5, self.y + self.radius - 5,width=5,  outline="black", tags=("end_oval", self.id)) 
+            self.toes.final.append(self)
+        else:
+            self.canvas.delete(self.end_oval_id)
+            self.toes.final.remove(self)
+            self.end_oval_id = None
+    
+
+
 
 class au_toma_toes: 
     def __init__(self):
         self.alphabet: list[str] = []
         self.nodes: list[Node()] = []
         self.edges: list[Edge()] = []
-        self.start = Node
+        self.start = None
         self.final: list[Node()] = []
 
     def node_finder(self,node_id):
@@ -37,7 +63,16 @@ class au_toma_toes:
             if edge.id == edge_id:
                 return edge
         return None
+    
+    def set_starting_node(self,node):
+        self.start = node
+    def unset_starting_node(self):
+        self.start = None
 
+    def set_ending_node(self,node):
+        self.final = node
+    def unset_ending_node(self):
+        self.final = None
 
 class stack_toes(au_toma_toes):
     def __init__(self):
@@ -70,8 +105,9 @@ class Edge:
         self.to_state = to_state
         self.from_tape = from_tape
         self.id = ID
+        self.coords = coords
         self.arrow_id = canvas.create_line(coords[0],coords[1],coords[2],coords[3],width=3,arrow=LAST,tags=("edge",ID))
-        self.text_id = canvas.create_text( (coords[0] + coords[2]) / 2,(coords[1] + coords[3]) / 2,text=tapeCat(from_tape),font=("Arial",20,"bold"),tags=("edge",ID),fill="red")
+        self.text_id = canvas.create_text((coords[0] + coords[2]) / 2,(coords[1] + coords[3]) / 2,text=tapeCat(from_tape),font=("Arial",20,"bold"),tags=("edge",ID),fill="red")
 
 class Edge_stack(Edge):
     def __init__(self, from_state: Node, to_state: Node, from_tape: str, from_stack: str):
@@ -91,6 +127,13 @@ def kill_node(canvas, n: Node, toes: au_toma_toes):
             kill_edge(canvas, edge, toes)
     canvas.delete(n.oval_id)
     canvas.delete(n.text_id)
+    if n.start_arrow_id:
+        canvas.delete(n.start_arrow_id)
+        toes.start = None
+    if n.end_oval_id:
+        canvas.delete(n.end_oval_id)
+        toes.final.remove(n)
+    
     toes.nodes.remove(n)
     
 
@@ -99,7 +142,7 @@ def draw_node(event,canvas,toes: au_toma_toes, Global):
     radius = Global.radius
     X = event.x
     Y = event.y
-    tmp_node = Node("q" + str(len(toes.nodes)),False,X,Y,canvas,Global.id_counter,Global.radius)
+    tmp_node = Node("q" + str(len(toes.nodes)),False,X,Y,canvas,Global.id_counter,Global.radius,toes)
     toes.nodes.append(tmp_node)
     Global.id_counter = Global.id_counter + 1
                     
@@ -165,7 +208,7 @@ class mouse_class:
                             X,Y
                     )
 
-    def on_release(self,event,canvas,toes,Global):
+    def on_release(self,event,canvas,toes,Global,selected):
         X = event.x
         Y = event.y
         canvas.delete(self.ctx["tmp_edge"])
@@ -176,13 +219,26 @@ class mouse_class:
         print(current)
         if not self.ctx["source_tag"]:
             if not current:
+                selected.delete_selected()
                 draw_node(event,canvas,toes,Global) 
         else:
             if self.ctx["source_tag"][0] == "node":
                 if current:
                     if current[0] == "node":
                         if current[1] != self.ctx["source_tag"][1]:
+                            selected.delete_selected()
                             draw_edge(self.ctx["source_tag"],current,canvas,toes,Global)
+                        else:
+                            selected.delete_selected()
+                            selected.tagV = current
+                            selected.draw_node()
+            elif self.ctx["source_tag"][0] == "edge":
+                if current:
+                    if current[0] == "edge":
+                        if current[1] == self.ctx["source_tag"][1]:
+                            selected.delete_selected()
+                            selected.tagV = current
+                            selected.draw_edge()
 
 
     def on_r_click(self,event,canvas,toes):
@@ -193,6 +249,48 @@ class mouse_class:
             if current[0] == "edge":
                 kill_edge(canvas,toes.edge_finder(current[1]),toes)
 
+class Selected:
+    def __init__(self, canvas, Global, toes,start_button,end_button,edge_field):
+        self.tagV = None
+        self.canvas = canvas
+        self.Global = Global
+        self.toes = toes
+        self.Radius = Global.radius + 5
+        self.oval_id = None
+        self.arrow_id = None
+        self.start_button = start_button
+        self.end_button = end_button
+        self.edge_field = edge_field
+
+    def draw_node(self):
+        self.oval_id = self.canvas.create_oval(self.toes.node_finder(self.tagV[1]).x - self.Radius,self.toes.node_finder(self.tagV[1]).y - self.Radius,self.toes.node_finder(self.tagV[1]).x + self.Radius,self.toes.node_finder(self.tagV[1]).y + self.Radius,outline="orange", tags=("selected_node"),width=5)
+        self.start_button.config(state=NORMAL)
+        self.end_button.config(state=NORMAL)
+        
+
+    def draw_edge(self):
+        self.arrow_id = self.canvas.create_line(self.toes.edge_finder(self.tagV[1]).coords[0],self.toes.edge_finder(self.tagV[1]).coords[1],self.toes.edge_finder(self.tagV[1]).coords[2],self.toes.edge_finder(self.tagV[1]).coords[3],width=5,arrow=LAST,tags=("selected_edge"),fill="orange")
+        for index, character in enumerate(self.toes.edge_finder(self.tagV[1]).from_tape):
+            self.edge_field.insert(index,character)
+    
+    def delete_selected(self):
+        if self.oval_id:
+            self.canvas.delete(self.oval_id)
+            self.oval_id = None
+            self.tagV = None
+            self.start_button.config(state=DISABLED)
+            self.start_button.deselect()
+            self.end_button.config(state=DISABLED)
+            self.end_button.deselect()
+            self.edge_field.delete(0,END)
+        if self.arrow_id:
+            self.canvas.delete(self.arrow_id)
+            self.arrow_id = None
+            self.tagV = None
+            self.edge_field.delete(0,END)
+        
+
+        
 
 
 
@@ -201,26 +299,58 @@ class mouse_class:
 
 # ------------------------- MAIN()
 root = Tk()
-drawCanvas = Canvas(root,height=500,width=500,bd=5,relief=GROOVE)
-drawCanvas.pack()
+#drawCanvas = Canvas(root,height=500,width=500,bd=5,relief=GROOVE)
+drawCanvas = Canvas(root,height=450,width=450,relief=GROOVE,bd=4, bg="white")
+drawCanvas.pack(fill=BOTH,expand=True,padx=10,pady=(10,5))
+
+
+
+# --------------------------- Frame & Options
+
+botton_frame = Frame(root, relief="groove", bd=5)
+botton_frame.pack()
+
+#   lubul = Button(botton_frame, text="Testar Palavra!",font=("Arial",14,"bold"), relief=RAISED, bd=3,bg="lightyellow" )
+#   lubul.pack()
+
+edge_button = Button(botton_frame, text="Modificar Seta",font=("Arial",14,"bold"), relief=RAISED, bd=3,bg="lightyellow" )
+edge_button.pack()
+
+edge_entry = Entry(botton_frame)
+edge_entry.pack()
+
+
+button_is_start = Checkbutton(botton_frame, text="Estado Inicial?",font=("arial",14,"bold"), relief=RAISED, bd=3,bg="lightyellow",state=DISABLED, command=lambda: selected_class.toes.node_finder(selected_class.tagV[1]).toggle_start())
+button_is_end = Checkbutton(botton_frame, text="Estado Terminal?",font=("arial",14,"bold"), relief=RAISED, bd=3,bg="lightyellow",state=DISABLED, command=lambda: selected_class.toes.node_finder(selected_class.tagV[1]).toggle_end())
+
+button_is_start.pack()
+button_is_end.pack()
+
+
+
+
+# -------- Classes init
+
+
 
 global_class = Global()
 main_toe = au_toma_toes()
 mouseThing = mouse_class()
+selected_class = Selected(drawCanvas,global_class,main_toe,button_is_start,button_is_end,edge_entry)                                        
+
+
+
+
+# ----------------- Binds
 
 drawCanvas.bind('<ButtonPress-1>',lambda event:mouseThing.on_click(event,drawCanvas,main_toe,global_class))
 drawCanvas.bind('<B1-Motion>',lambda event:mouseThing.on_drag(event,drawCanvas,main_toe))
-drawCanvas.bind('<ButtonRelease-1>',lambda event:mouseThing.on_release(event,drawCanvas,main_toe,global_class))
+drawCanvas.bind('<ButtonRelease-1>',lambda event:mouseThing.on_release(event,drawCanvas,main_toe,global_class,selected_class))
 drawCanvas.bind('<Button-3>',lambda event:mouseThing.on_r_click(event,drawCanvas,main_toe))
 
 drawCanvas.bind('<Button-2>', lambda event: print(tag_finder(event,drawCanvas)))
 
-Framester = Frame(root, relief="sunken")
-Framester.pack()
-lubul = Label(Framester, text="luguseima")
-lubul.pack()
 
-#tabela_tran = 
 
 
 
