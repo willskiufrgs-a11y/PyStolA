@@ -6,6 +6,7 @@ class Global:
     radius = 30
     
     
+    
 
 class Node:
     def __init__(self,name: str, is_final: bool, x,y, canvas, ID,radius,toes):
@@ -99,6 +100,13 @@ def get_points(node1,node2,toe,Global):
 def tapeCat(from_tape: list[str]) -> str:
     return ", ".join(from_tape)
 
+def tapeParse(unparsed: str) -> list[str]:
+    tmpList = []
+    for character in unparsed.replace(" ","").replace(",",""):
+        if not character in tmpList:
+            tmpList.append(character)
+    return tmpList
+
 class Edge:
     def __init__(self, from_state: Node, to_state: Node,canvas, from_tape: list[char],coords,ID):
         self.from_state = from_state
@@ -150,7 +158,7 @@ def draw_node(event,canvas,toes: au_toma_toes, Global):
 def draw_edge(node_start: Node,node_end: Node,canvas, toes: au_toma_toes, Global):
     radius = Global.radius
     coords = get_points(node_start,node_end,toes,Global)
-    tmp_edge = Edge(toes.node_finder(node_start[1]),toes.node_finder(node_end[1]),canvas,["a","b"],coords,Global.id_counter)
+    tmp_edge = Edge(toes.node_finder(node_start[1]),toes.node_finder(node_end[1]),canvas,[""],coords,Global.id_counter)
     toes.edges.append(tmp_edge)
     Global.id_counter = Global.id_counter + 1
 
@@ -250,7 +258,7 @@ class mouse_class:
                 kill_edge(canvas,toes.edge_finder(current[1]),toes)
 
 class Selected:
-    def __init__(self, canvas, Global, toes,start_button,end_button,edge_field):
+    def __init__(self, canvas, Global, toes,start_button,end_button,edge_field,edge_button):
         self.tagV = None
         self.canvas = canvas
         self.Global = Global
@@ -261,6 +269,7 @@ class Selected:
         self.start_button = start_button
         self.end_button = end_button
         self.edge_field = edge_field
+        self.edge_button = edge_button
 
     def draw_node(self):
         self.oval_id = self.canvas.create_oval(self.toes.node_finder(self.tagV[1]).x - self.Radius,self.toes.node_finder(self.tagV[1]).y - self.Radius,self.toes.node_finder(self.tagV[1]).x + self.Radius,self.toes.node_finder(self.tagV[1]).y + self.Radius,outline="orange", tags=("selected_node"),width=5)
@@ -269,11 +278,24 @@ class Selected:
         
 
     def draw_edge(self):
+        self.edge_field.config(state="normal")
+        self.edge_button.config(state="normal")
         self.arrow_id = self.canvas.create_line(self.toes.edge_finder(self.tagV[1]).coords[0],self.toes.edge_finder(self.tagV[1]).coords[1],self.toes.edge_finder(self.tagV[1]).coords[2],self.toes.edge_finder(self.tagV[1]).coords[3],width=5,arrow=LAST,tags=("selected_edge"),fill="orange")
-        for index, character in enumerate(self.toes.edge_finder(self.tagV[1]).from_tape):
-            self.edge_field.insert(index,character)
+        self.edge_field.delete(0,END)
+      # for index, character in enumerate(self.toes.edge_finder(self.tagV[1]).from_tape):
+      #     self.edge_field.insert(index,character)
+        self.edge_field.insert(0,tapeCat(self.toes.edge_finder(self.tagV[1]).from_tape))                                      
 
-
+    def get_edge(self):
+        string = self.edge_field.get()
+        string_list = tapeParse(string)
+        selectedEdge = self.toes.edge_finder(self.tagV[1])
+        selectedEdge.from_tape = string_list 
+        print(self.toes.edge_finder(self.tagV[1]).from_tape)
+        self.edge_field.delete(0,END)
+        self.edge_field.insert(0,tapeCat(string_list))
+        self.canvas.itemconfig(selectedEdge.text_id,text=tapeCat(string_list))
+        
 
     
     def delete_selected(self):
@@ -291,6 +313,8 @@ class Selected:
             self.arrow_id = None
             self.tagV = None
             self.edge_field.delete(0,END)
+            self.edge_field.config(state="disabled")
+            self.edge_button.config(state="disabled")
         
 
         
@@ -313,18 +337,28 @@ drawCanvas.pack(fill=BOTH,expand=True,padx=10,pady=(10,5))
 botton_frame = Frame(root, relief="groove", bd=5)
 botton_frame.pack()
 
+node_frame = Frame(botton_frame, relief="groove",bd=5) 
+edge_frame = Frame(botton_frame, relief="groove",bd=5)
+node_frame.pack(side="left", padx=10)
+edge_frame.pack(side="right", padx=10)
+
+edge_label = Label(edge_frame,text="Transições",font=("Arial",19,"bold"))
+node_label = Label(node_frame,text="Estados",font=("Arial",19,"bold"))
+edge_label.pack()
+node_label.pack()
+
 #   lubul = Button(botton_frame, text="Testar Palavra!",font=("Arial",14,"bold"), relief=RAISED, bd=3,bg="lightyellow" )
 #   lubul.pack()
 
-edge_button = Button(botton_frame, text="Modificar Seta",font=("Arial",14,"bold"), relief=RAISED, bd=3,bg="lightyellow" )
+edge_button = Button(edge_frame,state="disabled", text="Modificar Seta",font=("Arial",14,"bold"), relief=RAISED, bd=3,bg="lightyellow",command=lambda: selected_class.get_edge())
 edge_button.pack()
 
-edge_entry = Entry(botton_frame,font=("arial",14,"bold"))
+edge_entry = Entry(edge_frame,font=("arial",14,"bold"),state="disabled")
 edge_entry.pack()
 
 
-button_is_start = Checkbutton(botton_frame, text="Estado Inicial?",font=("arial",14,"bold"), relief=RAISED, bd=3,bg="lightyellow",state=DISABLED, command=lambda: selected_class.toes.node_finder(selected_class.tagV[1]).toggle_start())
-button_is_end = Checkbutton(botton_frame, text="Estado Terminal?",font=("arial",14,"bold"), relief=RAISED, bd=3,bg="lightyellow",state=DISABLED, command=lambda: selected_class.toes.node_finder(selected_class.tagV[1]).toggle_end())
+button_is_start = Checkbutton(node_frame, text="Estado Inicial?",font=("arial",14,"bold"), relief=RAISED, bd=3,bg="lightyellow",state=DISABLED, command=lambda: selected_class.toes.node_finder(selected_class.tagV[1]).toggle_start())
+button_is_end = Checkbutton(node_frame, text="Estado Terminal?",font=("arial",14,"bold"), relief=RAISED, bd=3,bg="lightyellow",state=DISABLED, command=lambda: selected_class.toes.node_finder(selected_class.tagV[1]).toggle_end())
 
 button_is_start.pack()
 button_is_end.pack()
@@ -339,7 +373,7 @@ button_is_end.pack()
 global_class = Global()
 main_toe = au_toma_toes()
 mouseThing = mouse_class()
-selected_class = Selected(drawCanvas,global_class,main_toe,button_is_start,button_is_end,edge_entry)                                        
+selected_class = Selected(drawCanvas,global_class,main_toe,button_is_start,button_is_end,edge_entry,edge_button)                                        
 
 
 
