@@ -83,19 +83,53 @@ class stack_toes(au_toma_toes):
 
 
 def get_points(node1,node2,toe,Global):
-    N1 = toe.node_finder(node1[1])
-    N2 = toe.node_finder(node2[1])
+    ret = []
+    if node1 != node2:
+        N1 = toe.node_finder(node1[1])
+        N2 = toe.node_finder(node2[1])
 
-    Hip = (((N1.x - N2.x) ** 2) + ((N1.y - N2.y) ** 2)) ** (1/2)
-    a = ((N1.x - N2.x) * Global.radius) / Hip
-    b = ((N1.y - N2.y) * Global.radius) / Hip
+        Hip = (((N1.x - N2.x) ** 2) + ((N1.y - N2.y) ** 2)) ** (1/2)
+        a = ((N1.x - N2.x) * Global.radius) / Hip
+        b = ((N1.y - N2.y) * Global.radius) / Hip
 
-    x1 = N1.x - a
-    y1 = N1.y - b
+        x1 = N1.x - a
+        y1 = N1.y - b
 
-    x2 = N2.x + a
-    y2 = N2.y + b
-    return [x1,y1,x2,y2]
+        x2 = N2.x + a
+        y2 = N2.y + b
+        ret.append(x1)
+        ret.append(y1)
+        ret.append(x2)
+        ret.append(y2)
+    else: 
+        angle_1 = math.pi * 0.3   # angulo que localiza o ponto tangente do nodo (como ponteiro em relogio)
+        radius2 = Global.radius * 1.5
+        number_subpoints = 25
+        hip = (Global.radius ** 2 + radius2 ** 2) ** (1/2)
+        N = toe.node_finder(node1[1])
+        centerX = N.x + math.cos(angle_1) * hip # coords of smaller circle
+        centerY = N.y - math.sin(angle_1) * hip # coords of smaller circle
+
+        # coordenada do primeiro ponto tangeente ao Nodo
+        xi1 = N.x + math.cos(angle_1) * Global.radius
+        yi1 = N.y - math.sin(angle_1) * Global.radius
+        ret.append(xi1)
+        ret.append(yi1)
+
+        slices = (2 * math.pi - 2 * angle_1) / number_subpoints
+        for i in range(0,number_subpoints,1): 
+            xtemp = centerX + math.cos(i*slices) * radius2
+            ytemp = centerY - math.sin(i*slices) * radius2
+            ret.append(xtemp)
+            ret.append(ytemp)
+
+        # coordenada do ultimo ponto tangeente ao Nodo
+        xf1 = N.x + math.cos((2) * angle_1) * Global.radius
+        yf1 = N.y - math.sin((2) * angle_1) * Global.radius
+        ret.append(xf1)
+        ret.append(yf1)
+    print(ret)
+    return ret
 
 def tapeCat(from_tape: list[str]) -> str:
     return ", ".join(from_tape)
@@ -114,8 +148,10 @@ class Edge:
         self.from_tape = from_tape
         self.id = ID
         self.coords = coords
-        self.arrow_id = canvas.create_line(coords[0],coords[1],coords[2],coords[3],width=3,arrow=LAST,tags=("edge",ID))
+        self.arrow_id = canvas.create_line(coords,width=3,arrow=LAST,tags=("edge",ID))
+        #self.arrow_id = canvas.create_line(coords[0],coords[1],coords[2],coords[3],width=3,arrow=LAST,tags=("edge",ID))
         self.text_id = canvas.create_text((coords[0] + coords[2]) / 2,(coords[1] + coords[3]) / 2,text=tapeCat(from_tape),font=("Arial",20,"bold"),tags=("edge",ID),fill="red")
+        
 
 class Edge_stack(Edge):
     def __init__(self, from_state: Node, to_state: Node, from_tape: str, from_stack: str):
@@ -179,7 +215,11 @@ def tag_finder(event,canvas):
     return None
 
 class mouse_class:
-    def __init__(self):
+    def __init__(self,canvas,toes,Global,selected):
+        self.selected = selected
+        self.Global = Global
+        self.canvas = canvas
+        self.toes = toes
         self.ctx = {
             "start_x": 0,  
             "start_y": 0, 
@@ -188,74 +228,86 @@ class mouse_class:
             "tmp_edge": None
         }
 
-    def on_click(self,event,canvas,toes,Global):
+    def del_tmp_edge(self):
+        self.canvas.delete(self.ctx["tmp_edge"])
+        self.ctx["tmp_edge"] = None
+        self.canvas.update_idletasks()
+
+    def on_click(self,event):
         X = event.x
         Y = event.y
         self.ctx["start_x"] = X
         self.ctx["start_y"] = Y
         self.ctx["is_dragging"] = False
-        thing = tag_finder(event,canvas)
+        thing = tag_finder(event,self.canvas)
         self.ctx["source_tag"] = thing
         #print(thing)
 
-    def on_drag(self, event, canvas, toes): 
+    def on_drag(self, event): 
         if self.ctx["source_tag"]:
             X = event.x
             Y = event.y
             dx = self.ctx["start_x"] - X
             dy = self.ctx["start_y"] - Y
             dist = ((dx ** 2) + (dy ** 2)) ** (1/2)
-            if (dist > 4 and self.ctx["source_tag"][0] == "node") :
+            if (dist > 24 and self.ctx["source_tag"][0] == "node") :
                 self.ctx["is_dragging"] = True
                 if not self.ctx["tmp_edge"]:
-                    self.ctx["tmp_edge"] = canvas.create_line(self.ctx["start_x"],self.ctx["start_y"], X,Y, arrow=LAST, fill="red", width=4,tags=("tmp_edge",))
+                    self.ctx["tmp_edge"] = self.canvas.create_line(self.ctx["start_x"],self.ctx["start_y"], X,Y, arrow=LAST, fill="red", width=4,tags=("tmp_edge",))
                 else:
-                    canvas.coords(
+                    self.canvas.coords(
                             self.ctx["tmp_edge"],
                             self.ctx["start_x"], self.ctx["start_y"],
                             X,Y
                     )
 
-    def on_release(self,event,canvas,toes,Global,selected):
+    def on_release(self,event):
         X = event.x
         Y = event.y
-        canvas.delete(self.ctx["tmp_edge"])
-        self.ctx["tmp_edge"] = None
-        self.ctx["is_dragging"] = False
-        canvas.update_idletasks()
-        current = tag_finder(event,canvas) 
+        self.del_tmp_edge()
+        current = tag_finder(event,self.canvas) 
         print(current)
         if not self.ctx["source_tag"]:
             if not current:
-                selected.delete_selected()
-                draw_node(event,canvas,toes,Global) 
+                self.selected.delete_selected()
+                draw_node(event,self.canvas,self.toes,self.Global) 
+            else:    # Toggles initial node if releasing with no source node
+                self.selected.delete_selected()
+                self.toes.node_finder(current[1]).toggle_start()
         else:
             if self.ctx["source_tag"][0] == "node":
                 if current:
                     if current[0] == "node":
                         if current[1] != self.ctx["source_tag"][1]:
-                            selected.delete_selected()
-                            draw_edge(self.ctx["source_tag"],current,canvas,toes,Global)
-                        else:
-                            selected.delete_selected()
-                            selected.tagV = current
-                            selected.draw_node()
+                            self.selected.delete_selected()
+                            draw_edge(self.ctx["source_tag"],current,self.canvas,self.toes,self.Global)
+                        elif self.ctx["is_dragging"]:
+     #----------------->    # Draw edge to itself!
+                            self.selected.delete_selected()
+                            draw_edge(self.ctx["source_tag"],current,self.canvas,self.toes,self.Global)
+
+
+                            self.selected.delete_selected()
+                            self.selected.tagV = current
+                            self.selected.draw_node()
             elif self.ctx["source_tag"][0] == "edge":
                 if current:
                     if current[0] == "edge":
                         if current[1] == self.ctx["source_tag"][1]:
-                            selected.delete_selected()
-                            selected.tagV = current
-                            selected.draw_edge()
+                           self.selected.delete_selected()
+                           self.selected.tagV = current
+                           self.selected.draw_edge()
+
+        self.ctx["is_dragging"] = False
 
 
-    def on_r_click(self,event,canvas,toes):
-        current = tag_finder(event,canvas)
+    def on_r_click(self,event):
+        current = tag_finder(event,self.canvas)
         if current:
             if current[0] == "node":
-                kill_node(canvas,toes.node_finder(current[1]),toes)
+                kill_node(self.canvas,self.toes.node_finder(current[1]),self.toes)
             if current[0] == "edge":
-                kill_edge(canvas,toes.edge_finder(current[1]),toes)
+                kill_edge(self.canvas,self.toes.edge_finder(current[1]),self.toes)
 
 class Selected:
     def __init__(self, canvas, Global, toes,start_button,end_button,edge_field,edge_button):
@@ -316,9 +368,6 @@ class Selected:
             self.edge_field.config(state="disabled")
             self.edge_button.config(state="disabled")
         
-
-        
-#def word_tester():
 
 
 
@@ -382,18 +431,17 @@ button_is_end.pack()
 
 global_class = Global()
 main_toe = au_toma_toes()
-mouseThing = mouse_class()
 selected_class = Selected(drawCanvas,global_class,main_toe,button_is_start,button_is_end,edge_entry,edge_button)                                        
-
+mouseThing = mouse_class(drawCanvas,main_toe,global_class,selected_class)
 
 
 
 # ----------------- Binds
 
-drawCanvas.bind('<ButtonPress-1>',lambda event:mouseThing.on_click(event,drawCanvas,main_toe,global_class))
-drawCanvas.bind('<B1-Motion>',lambda event:mouseThing.on_drag(event,drawCanvas,main_toe))
-drawCanvas.bind('<ButtonRelease-1>',lambda event:mouseThing.on_release(event,drawCanvas,main_toe,global_class,selected_class))
-drawCanvas.bind('<Button-3>',lambda event:mouseThing.on_r_click(event,drawCanvas,main_toe))
+drawCanvas.bind('<ButtonPress-1>',lambda event:mouseThing.on_click(event))
+drawCanvas.bind('<B1-Motion>',lambda event:mouseThing.on_drag(event))
+drawCanvas.bind('<ButtonRelease-1>',lambda event:mouseThing.on_release(event))
+drawCanvas.bind('<Button-3>',lambda event:mouseThing.on_r_click(event))
 
 drawCanvas.bind('<Button-2>', lambda event: print(tag_finder(event,drawCanvas)))
 
