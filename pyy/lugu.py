@@ -205,7 +205,7 @@ class mouse_class:
             dx = self.ctx["start_x"] - X
             dy = self.ctx["start_y"] - Y
             dist = ((dx ** 2) + (dy ** 2)) ** (1/2)
-            if (dist > 4 and self.ctx["source_tag"][0] == "node") :
+            if (dist > 24 and self.ctx["source_tag"][0] == "node") :
                 self.ctx["is_dragging"] = True
                 if not self.ctx["tmp_edge"]:
                     self.ctx["tmp_edge"] = canvas.create_line(self.ctx["start_x"],self.ctx["start_y"], X,Y, arrow=LAST, fill="red", width=4,tags=("tmp_edge",))
@@ -317,7 +317,7 @@ class Selected:
             self.edge_button.config(state="disabled")
         
 
-        
+            dsf
 
 
 
