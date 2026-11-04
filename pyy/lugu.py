@@ -19,7 +19,7 @@ class Node:
         self.radius = radius
         self.oval_id = canvas.create_oval( x - radius, y - radius, x + radius, y + radius, fill="lightblue", outline="black", tags=("node",ID)) 
         self.text_id = canvas.create_text( x,y,text=name,font=("Arial",10,"bold"),tags=("node",ID))
-        self.start_arrow_id = None
+        self.start_arrow_id = None 
         self.end_oval_id = None
         self.toes = toes
 
@@ -318,6 +318,8 @@ class Selected:
         
 
         
+#def word_tester():
+
 
 
 
@@ -332,23 +334,31 @@ drawCanvas.pack(fill=BOTH,expand=True,padx=10,pady=(10,5))
 
 
 
-# --------------------------- Frame & Options
+# --------------------------- Frame & Widgets
 
 botton_frame = Frame(root, relief="groove", bd=5)
 botton_frame.pack()
 
 node_frame = Frame(botton_frame, relief="groove",bd=5) 
 edge_frame = Frame(botton_frame, relief="groove",bd=5)
+tester_frame = Frame(botton_frame, relief="groove",bd=5)
 node_frame.pack(side="left", padx=10)
 edge_frame.pack(side="right", padx=10)
+tester_frame.pack(padx=10)
 
 edge_label = Label(edge_frame,text="Transições",font=("Arial",19,"bold"))
 node_label = Label(node_frame,text="Estados",font=("Arial",19,"bold"))
+tester_label = Label(tester_frame,text="Palavra aceita?",font=("Arial",19,"bold")) 
 edge_label.pack()
 node_label.pack()
+tester_label.pack()
 
-#   lubul = Button(botton_frame, text="Testar Palavra!",font=("Arial",14,"bold"), relief=RAISED, bd=3,bg="lightyellow" )
-#   lubul.pack()
+
+tester_button = Button(tester_frame, text="Testar Palavra",font=("Arial",14,"bold"), relief=RAISED, bd=3,bg="lightyellow")
+tester_button.pack()
+tester_entry = Entry(tester_frame,font=("arial",14,"bold"))
+tester_entry.pack()
+
 
 edge_button = Button(edge_frame,state="disabled", text="Modificar Seta",font=("Arial",14,"bold"), relief=RAISED, bd=3,bg="lightyellow",command=lambda: selected_class.get_edge())
 edge_button.pack()
