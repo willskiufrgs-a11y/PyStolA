@@ -1,0 +1,114 @@
+*   [33mcommit 966984fd12be198120f6564c391ad8d3c34fafc5[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+[31m|[m[32m\[m  Merge: 6022db0 35fb88a
+[31m|[m [32m|[m Author: william <willianfalenski@gmail.com>
+[31m|[m [32m|[m Date:   Wed Nov 4 18:35:33 2026 -0300
+[31m|[m [32m|[m 
+[31m|[m [32m|[m     circles progress and new buttons
+[31m|[m [32m|[m 
+[31m|[m * [33mcommit 35fb88a9f43f5e705d11f770cfaaed18603b33a5[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+[31m|[m [32m|[m Author: willski <willski.ufrgs@gmail.com>
+[31m|[m [32m|[m Date:   Wed Nov 4 14:47:09 2026 -0300
+[31m|[m [32m|[m 
+[31m|[m [32m|[m     working progress circle
+[31m|[m [32m|[m 
+[31m|[m * [33mcommit 0e9ba6095cb19237403374d4f45e38af1bb6096f[m
+[31m|[m [32m|[m Author: willski <willski.ufrgs@gmail.com>
+[31m|[m [32m|[m Date:   Wed Nov 4 10:48:49 2026 -0300
+[31m|[m [32m|[m 
+[31m|[m [32m|[m     pre mouse_changes
+[31m|[m [32m|[m 
+* [32m|[m [33mcommit 6022db03382f0f9f57e0623023fe544590db55b6[m[33m ([m[1;32mlocal_older_main[m[33m)[m
+[32m|[m[32m/[m  Author: william <willianfalenski@gmail.com>
+[32m|[m   Date:   Wed Nov 4 17:44:51 2026 -0300
+[32m|[m   
+[32m|[m       maybe stash-able
+[32m|[m 
+* [33mcommit 9ff37f21788eaf38a521377fd87f3499dacbb99d[m[33m ([m[1;32mclick_union[m[33m)[m
+[32m|[m Author: william <willianfalenski@gmail.com>
+[32m|[m Date:   Sun Nov 1 22:47:57 2026 -0300
+[32m|[m 
+[32m|[m     good enough for phase 2
+[32m|[m 
+* [33mcommit 314eebc37b5b549933cb00ab7f3e1c4394272ce4[m
+[32m|[m Author: william <willianfalenski@gmail.com>
+[32m|[m Date:   Sun Nov 1 13:58:18 2026 -0300
+[32m|[m 
+[32m|[m     b4 fork
+[32m|[m 
+* [33mcommit 53bb73a8600ff4e51812dd5906f13cea7568c1b9[m
+[32m|[m Author: william <willianfalenski@gmail.com>
+[32m|[m Date:   Sun Nov 1 03:23:04 2026 -0300
+[32m|[m 
+[32m|[m     begining and end Nodes, selection..
+[32m|[m 
+* [33mcommit e4ed9a42be41529ee1889d3b7a3d66b869165a5f[m
+[32m|[m Author: william <willianfalenski@gmail.com>
+[32m|[m Date:   Fri Oct 30 13:42:56 2026 -0300
+[32m|[m 
+[32m|[m     label edges
+[32m|[m 
+* [33mcommit 1274d2f474e6561b9faf9c1e5f9cae797da8a499[m
+[32m|[m Author: william <willianfalenski@gmail.com>
+[32m|[m Date:   Wed Oct 28 03:18:42 2026 -0300
+[32m|[m 
+[32m|[m     edge deletion!
+[32m|[m 
+* [33mcommit d618d291977bd25016cec97a2d80fe01eb015971[m
+[32m|[m Author: william <willianfalenski@gmail.com>
+[32m|[m Date:   Mon Oct 26 01:53:48 2026 -0300
+[32m|[m 
+[32m|[m     edges!
+[32m|[m 
+* [33mcommit 2bc1040d88640011e5217a0c4808c263b698615e[m
+[32m|[m Author: william <willianfalenski@gmail.com>
+[32m|[m Date:   Sat Oct 24 22:13:59 2026 -0300
+[32m|[m 
+[32m|[m     Working, node ids, find_withtags
+[32m|[m 
+* [33mcommit 2b9ce6046b8d8fef46043469f4d5faa677a5d3cd[m
+[32m|[m Author: willski <willski.ufrgs@gmail.com>
+[32m|[m Date:   Fri Oct 23 17:49:07 2026 -0300
+[32m|[m 
+[32m|[m     delete nodes...
+[32m|[m 
+* [33mcommit 31ab340be35aee333e7f23475379e1fe22cb68de[m
+[32m|[m Author: willski <willski.ufrgs@gmail.com>
+[32m|[m Date:   Thu Oct 22 17:37:48 2026 -0300
+[32m|[m 
+[32m|[m     Now it draws!
+[32m|[m 
+* [33mcommit a7fda9b71be4f6c653a41224f855a1fe922d31fe[m
+[32m|[m Author: willski <willski.ufrgs@gmail.com>
+[32m|[m Date:   Wed Oct 21 17:48:15 2026 -0300
+[32m|[m 
+[32m|[m     lugu
+[32m|[m 
+* [33mcommit e9be4fe5d0832004f9fad1199ef1a0c4612ade27[m
+[32m|[m Author: willski <willski.ufrgs@gmail.com>
+[32m|[m Date:   Fri Oct 16 16:05:46 2026 -0300
+[32m|[m 
+[32m|[m      test
+[32m|[m 
+* [33mcommit 670a4f2e325d5ed6d15574259086d4af17176d4a[m
+[32m|[m Author: william <willianfalenski@gmail.com>
+[32m|[m Date:   Fri Oct 16 11:17:47 2026 -0300
+[32m|[m 
+[32m|[m     clua
+[32m|[m 
+* [33mcommit 78f170245755a340f48db3edd8ce3a28b98fc808[m
+[32m|[m Author: willski <willski.ufrgs@gmail.com>
+[32m|[m Date:   Fri Oct 9 16:56:40 2026 -0300
+[32m|[m 
+[32m|[m     vibe-coding prototypes
+[32m|[m 
+* [33mcommit 6ee68f59e8db35c44a636aeae450d8dcce2ac145[m
+[32m|[m Author: willskiufrgs-a11y <willski.ufrgs@gmail.com>
+[32m|[m Date:   Thu Oct 8 17:55:44 2026 -0300
+[32m|[m 
+[32m|[m     Add files via upload
+[32m|[m 
+* [33mcommit e1b0db9da5f61439fd0a922d0693a53da8cf2b9d[m
+  Author: willskiufrgs-a11y <willski.ufrgs@gmail.com>
+  Date:   Thu Oct 8 17:33:07 2026 -0300
+  
+      Initial commit

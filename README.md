@@ -1,6 +1,20 @@
 # PyStolA
 
 
+
+
+
+-> Today (05/11/2026):
+
+ Issues for later:
+ - [ ] Overlapping edges (de um nodo pra outro e daquele pra esse).
+ - [ ] Movimentação de edges...
+
+
+
+
+--------------------------------------------------------------------------------------------------
+
 -> Today (28/10/2026) [madrugada]:
 
 

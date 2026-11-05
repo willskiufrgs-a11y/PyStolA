@@ -1,9 +1,10 @@
 from tkinter import *
 from tkinter import ttk
 import math
+import numpy as np
 class Global:
     id_counter = 0
-    radius = 30
+    radius = 35
     
     
     
@@ -18,7 +19,7 @@ class Node:
         self.id = ID
         self.radius = radius
         self.oval_id = canvas.create_oval( x - radius, y - radius, x + radius, y + radius, fill="lightblue", outline="black", tags=("node",ID)) 
-        self.text_id = canvas.create_text( x,y,text=name,font=("Arial",10,"bold"),tags=("node",ID))
+        self.text_id = canvas.create_text( x,y,text=name,font=("Arial",12,"bold"),tags=("node",ID))
         self.start_arrow_id = None 
         self.end_oval_id = None
         self.toes = toes
@@ -102,33 +103,25 @@ def get_points(node1,node2,toe,Global):
         ret.append(x2)
         ret.append(y2)
     else: 
-        angle_1 = math.pi * 0.3   # angulo que localiza o ponto tangente do nodo (como ponteiro em relogio)
-        radius2 = Global.radius * 1.5
-        number_subpoints = 25
+        angle_1 = math.pi * 0.75   # angulo que localiza o ponto tangente do nodo (como ponteiro em relogio)
+        radius2 = Global.radius * 0.9
+        number_subpoints = 6
         hip = (Global.radius ** 2 + radius2 ** 2) ** (1/2)
+
+        # angle_diagram.png for more details
+        slice_angle = math.pi - math.acos(radius2/hip)
+        min_angle = angle_1 - slice_angle
+        max_angle = angle_1 + slice_angle
         N = toe.node_finder(node1[1])
+
         centerX = N.x + math.cos(angle_1) * hip # coords of smaller circle
         centerY = N.y - math.sin(angle_1) * hip # coords of smaller circle
 
-        # coordenada do primeiro ponto tangeente ao Nodo
-        xi1 = N.x + math.cos(angle_1) * Global.radius
-        yi1 = N.y - math.sin(angle_1) * Global.radius
-        ret.append(xi1)
-        ret.append(yi1)
-
-        slices = (2 * math.pi - 2 * angle_1) / number_subpoints
-        for i in range(0,number_subpoints,1): 
-            xtemp = centerX + math.cos(i*slices) * radius2
-            ytemp = centerY - math.sin(i*slices) * radius2
+        for i in np.linspace(min_angle,max_angle,number_subpoints,endpoint=True): 
+            xtemp = centerX + math.cos(i) * radius2
+            ytemp = centerY - math.sin(i) * radius2
             ret.append(xtemp)
             ret.append(ytemp)
-
-        # coordenada do ultimo ponto tangeente ao Nodo
-        xf1 = N.x + math.cos((2) * angle_1) * Global.radius
-        yf1 = N.y - math.sin((2) * angle_1) * Global.radius
-        ret.append(xf1)
-        ret.append(yf1)
-    print(ret)
     return ret
 
 def tapeCat(from_tape: list[str]) -> str:
@@ -141,6 +134,14 @@ def tapeParse(unparsed: str) -> list[str]:
             tmpList.append(character)
     return tmpList
 
+def avg_point(pointL: list[float]) -> list[float]:
+
+    medium_x = sum(pointL[0:len(pointL):2]) / (len(pointL) / 2)
+    medium_y = sum(pointL[1:len(pointL):2]) / (len(pointL) / 2)
+
+    return [medium_x, medium_y]
+
+
 class Edge:
     def __init__(self, from_state: Node, to_state: Node,canvas, from_tape: list[char],coords,ID):
         self.from_state = from_state
@@ -148,9 +149,8 @@ class Edge:
         self.from_tape = from_tape
         self.id = ID
         self.coords = coords
-        self.arrow_id = canvas.create_line(coords,width=3,arrow=LAST,tags=("edge",ID))
-        #self.arrow_id = canvas.create_line(coords[0],coords[1],coords[2],coords[3],width=3,arrow=LAST,tags=("edge",ID))
-        self.text_id = canvas.create_text((coords[0] + coords[2]) / 2,(coords[1] + coords[3]) / 2,text=tapeCat(from_tape),font=("Arial",20,"bold"),tags=("edge",ID),fill="red")
+        self.arrow_id = canvas.create_line(coords,width=3,arrow=LAST,tags=("edge",ID),smooth=True)
+        self.text_id = canvas.create_text(avg_point(coords),text=tapeCat(from_tape),font=("Arial",18,"bold"),tags=("edge",ID),fill="red")
         
 
 class Edge_stack(Edge):
@@ -281,15 +281,15 @@ class mouse_class:
                         if current[1] != self.ctx["source_tag"][1]:
                             self.selected.delete_selected()
                             draw_edge(self.ctx["source_tag"],current,self.canvas,self.toes,self.Global)
-                        elif self.ctx["is_dragging"]:
-     #----------------->    # Draw edge to itself!
-                            self.selected.delete_selected()
-                            draw_edge(self.ctx["source_tag"],current,self.canvas,self.toes,self.Global)
-
-
-                            self.selected.delete_selected()
-                            self.selected.tagV = current
-                            self.selected.draw_node()
+                        else:
+                            if self.ctx["is_dragging"]:
+         #----------------->    # Draw edge to itself!
+                                self.selected.delete_selected()
+                                draw_edge(self.ctx["source_tag"],current,self.canvas,self.toes,self.Global)
+                            else:
+                                self.selected.delete_selected()
+                                self.selected.tagV = current
+                                self.selected.draw_node()
             elif self.ctx["source_tag"][0] == "edge":
                 if current:
                     if current[0] == "edge":
@@ -332,10 +332,8 @@ class Selected:
     def draw_edge(self):
         self.edge_field.config(state="normal")
         self.edge_button.config(state="normal")
-        self.arrow_id = self.canvas.create_line(self.toes.edge_finder(self.tagV[1]).coords[0],self.toes.edge_finder(self.tagV[1]).coords[1],self.toes.edge_finder(self.tagV[1]).coords[2],self.toes.edge_finder(self.tagV[1]).coords[3],width=5,arrow=LAST,tags=("selected_edge"),fill="orange")
+        self.arrow_id = self.canvas.create_line(self.toes.edge_finder(self.tagV[1]).coords,width=5,arrow=LAST,tags=("selected_edge"),fill="orange",smooth=True)
         self.edge_field.delete(0,END)
-      # for index, character in enumerate(self.toes.edge_finder(self.tagV[1]).from_tape):
-      #     self.edge_field.insert(index,character)
         self.edge_field.insert(0,tapeCat(self.toes.edge_finder(self.tagV[1]).from_tape))                                      
 
     def get_edge(self):
