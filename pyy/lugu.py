@@ -369,6 +369,35 @@ class Selected:
             self.edge_button.config(state="disabled")
         
 
+def transictionFunction(letter: String, n: Node, toe: au_toma_toes) -> Node: 
+    current_edge = None
+    for edge in toe.edges:
+        if edge.from_state == n:
+            current_edge = edge
+            break
+    if current_edge:
+        if letter in current_edge.from_tape:
+            return current_edge.to_state
+    else:
+        return None
+
+
+def tester(toes,entry):
+    print("this was called\n")
+    tape = entry.get()
+    current_node = toes.start
+    for letter in tape:
+        next_node = transictionFunction(letter,current_node,toes)
+        if next_node:
+            current_node = next_node
+            print(current_node.name)
+        else:
+            break
+    print("Parou no nó: " + current_node.name)
+
+    
+        
+
 
 
 
@@ -398,6 +427,10 @@ node_frame.pack(side="left", padx=10)
 edge_frame.pack(side="right", padx=10)
 tester_frame.pack(side="left",padx=10)
 
+
+tester_response = Label(botton_frame2,text="",font=("Arial",19,"bold"))
+tester_response.pack(side="right",padx=10)
+
 edge_label = Label(edge_frame,text="Transições",font=("Arial",19,"bold"))
 node_label = Label(node_frame,text="Estados",font=("Arial",19,"bold"))
 tester_label = Label(tester_frame,text="Palavra aceita?",font=("Arial",19,"bold")) 
@@ -406,7 +439,7 @@ node_label.pack()
 tester_label.pack()
 
 
-tester_button = Button(tester_frame, text="Testar Palavra",font=("Arial",14,"bold"), relief=RAISED, bd=3,bg="lightyellow")
+tester_button = Button(tester_frame, text="Testar Palavra",font=("Arial",14,"bold"), relief=RAISED, bd=3,bg="lightyellow", command=lambda: tester(main_toe,tester_entry))
 tester_button.pack()
 tester_entry = Entry(tester_frame,font=("arial",14,"bold"))
 tester_entry.pack()
