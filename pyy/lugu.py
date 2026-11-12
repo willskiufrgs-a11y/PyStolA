@@ -149,6 +149,7 @@ class Edge:
         self.from_tape = from_tape
         self.id = ID
         self.coords = coords
+        self.arrow_id_ghost = canvas.create_line(coords,width=16,arrow=LAST,tags=("edge",ID),smooth=True,fill="#ffffff")
         self.arrow_id = canvas.create_line(coords,width=3,arrow=LAST,tags=("edge",ID),smooth=True)
         self.text_id = canvas.create_text(avg_point(coords),text=tapeCat(from_tape),font=("Arial",18,"bold"),tags=("edge",ID),fill="red")
         
@@ -162,6 +163,7 @@ class Edge_stack(Edge):
 
 def kill_edge(canvas, edge, toes):
     canvas.delete(edge.arrow_id)
+    canvas.delete(edge.arrow_id_ghost)
     canvas.delete(edge.text_id)
     toes.edges.remove(edge)
 
@@ -373,6 +375,7 @@ class Selected:
 
 
 
+
 # ------------------------- MAIN()
 root = Tk()
 #drawCanvas = Canvas(root,height=500,width=500,bd=5,relief=GROOVE)
@@ -385,13 +388,15 @@ drawCanvas.pack(fill=BOTH,expand=True,padx=10,pady=(10,5))
 
 botton_frame = Frame(root, relief="groove", bd=5)
 botton_frame.pack()
+botton_frame2 = Frame(root, relief="groove", bd=5)
+botton_frame2.pack()
 
 node_frame = Frame(botton_frame, relief="groove",bd=5) 
 edge_frame = Frame(botton_frame, relief="groove",bd=5)
-tester_frame = Frame(botton_frame, relief="groove",bd=5)
+tester_frame = Frame(botton_frame2, relief="groove",bd=5)
 node_frame.pack(side="left", padx=10)
 edge_frame.pack(side="right", padx=10)
-tester_frame.pack(padx=10)
+tester_frame.pack(side="left",padx=10)
 
 edge_label = Label(edge_frame,text="Transições",font=("Arial",19,"bold"))
 node_label = Label(node_frame,text="Estados",font=("Arial",19,"bold"))
