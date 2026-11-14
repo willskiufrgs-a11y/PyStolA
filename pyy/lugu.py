@@ -372,31 +372,51 @@ class Selected:
 
 # -------------------------------------------------------------- Tester functions
 
-def transictionFunction(letter: String, n: Node, toe: au_toma_toes) -> Node: 
+def transictionFunction(letter: String, n: Node, toe: au_toma_toes) -> list[Node]: 
+    candidate_edges = []
     for edge in toe.edges:
         if edge.from_state == n:
             if letter in edge.from_tape:
-                return edge.to_state
-    return None
+                candidate_edges.append(edge.to_state)
+
+    print(candidate_edges)
+    return candidate_edges
+
+def tester_rec(words: string,tape_head: int, from_states: list[node],toe) -> list[node]:
+    next_nodes = []
+  # print("tape head: " + str(tape_head) + "\n")
+  # print("leng: " + str(len(words)) + "\n")
+    for node in from_states:
+        tmp_list = transictionFunction(words[tape_head],node,toe)
+        if tmp_list:
+            next_nodes += tmp_list
+    if (len(words) > tape_head + 1) and next_nodes:
+        return tester_rec(words,tape_head + 1,next_nodes,toe)
+    else:
+        return next_nodes
 
 
 def tester(toes,entry,resp_label):
-    print("this was called\n")
     tape = entry.get()
-    current_node = toes.start
-    for letter in tape:
-        next_node = transictionFunction(letter,current_node,toes)
-        if next_node:
-            current_node = next_node
-            print(current_node.name)
-        else:
-            print("palavra rejeitada!")
-            resp_label.config(text="Palavra Rejeitada!")
+    if len(tape) == 0:
+        if toes.start in toes.final:
+            resp_label.config(text="Palavra Aceita!")
             return
-    if (current_node in toes.final):
-        resp_label.config(text="Palavra Aceita!")
+        else:
+            resp_label.config(text="Palavra Rejeitada!(nnot final)")
+            return
+    ending_node = tester_rec(tape,0,[toes.start],toes)
+ #  print(ending_node)
+ #  print(len(ending_node))
+ #  print(toes.final)      
+    if not ending_node:
+        resp_label.config(text="Palavra Rejeitada!(indeter)")
     else:
-        resp_label.config(text="Palavra Rejeitada!")
+        for node in ending_node:
+            if node in toes.final:
+                resp_label.config(text="Palavra Aceita!")
+                return
+        resp_label.config(text="Palavra Rejeitada!(nnot final)")
 
 
 
