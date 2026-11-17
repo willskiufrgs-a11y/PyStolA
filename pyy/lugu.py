@@ -378,8 +378,9 @@ def transictionFunction(letter: String, n: Node, toe: au_toma_toes) -> list[Node
         if edge.from_state == n:
             if letter in edge.from_tape:
                 candidate_edges.append(edge.to_state)
+            if E in edge.from_tape:
+                candidate_edges.append(transactionFunction(letter,edge.to_state,toe))
 
-    print(candidate_edges)
     return candidate_edges
 
 def tester_rec(words: string,tape_head: int, from_states: list[node],toe) -> list[node]:
