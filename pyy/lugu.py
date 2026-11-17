@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import ttk
 import math
 import numpy as np
+from collections import Counter
 class Global:
     id_counter = 0
     radius = 35
@@ -268,7 +269,7 @@ class mouse_class:
         Y = event.y
         self.del_tmp_edge()
         current = tag_finder(event,self.canvas) 
-        print(current)
+       # print(current)
         if not self.ctx["source_tag"]:
             if not current:
                 self.selected.delete_selected()
@@ -343,7 +344,7 @@ class Selected:
         string_list = tapeParse(string)
         selectedEdge = self.toes.edge_finder(self.tagV[1])
         selectedEdge.from_tape = string_list 
-        print(self.toes.edge_finder(self.tagV[1]).from_tape)
+       # print(self.toes.edge_finder(self.tagV[1]).from_tape)
         self.edge_field.delete(0,END)
         self.edge_field.insert(0,tapeCat(string_list))
         self.canvas.itemconfig(selectedEdge.text_id,text=tapeCat(string_list))
@@ -371,22 +372,31 @@ class Selected:
 
 
 # -------------------------------------------------------------- Tester functions
-
+           # Para essas funções, depois seria bom limpar as listas de nodos, checkando se os novos nodos já estão na lista antess de apendelos lá... Claro, tomando cuidado para não ratirar com leituras..
 def transictionFunction(letter: String, n: Node, toe: au_toma_toes) -> list[Node]: 
-    candidate_edges = []
+    candidate_nodes = []
     for edge in toe.edges:
         if edge.from_state == n:
+            if "E" in edge.from_tape:
+                candidate_nodes.append(edge.to_state)
+                candidate_nodes += transictionFunction(letter,edge.to_state,toe)
             if letter in edge.from_tape:
-                candidate_edges.append(edge.to_state)
-            if E in edge.from_tape:
-                candidate_edges.append(transactionFunction(letter,edge.to_state,toe))
+                candidate_nodes.append(edge.to_state)
+    return candidate_nodes
 
-    return candidate_edges
+def tinyRec(nodeList: list[Node],toe) -> list[Node]:
+    tmp_list2 = []
+    for node in nodeList:
+        res = transictionFunction(" ",node,toe)
+        if res:
+            tmp_list2 = list(set(tmp_list2) | set(res))
+    if set(tmp_list2) - set(nodeList):
+        return tinyRec(list(set(nodeList) | set(tmp_list2)),toe)
+    else:
+        return nodeList
 
 def tester_rec(words: string,tape_head: int, from_states: list[node],toe) -> list[node]:
     next_nodes = []
-  # print("tape head: " + str(tape_head) + "\n")
-  # print("leng: " + str(len(words)) + "\n")
     for node in from_states:
         tmp_list = transictionFunction(words[tape_head],node,toe)
         if tmp_list:
@@ -394,8 +404,7 @@ def tester_rec(words: string,tape_head: int, from_states: list[node],toe) -> lis
     if (len(words) > tape_head + 1) and next_nodes:
         return tester_rec(words,tape_head + 1,next_nodes,toe)
     else:
-        return next_nodes
-
+        return tinyRec(next_nodes,toe)
 
 def tester(toes,entry,resp_label):
     tape = entry.get()
@@ -404,12 +413,8 @@ def tester(toes,entry,resp_label):
             resp_label.config(text="Palavra Aceita!")
             return
         else:
-            resp_label.config(text="Palavra Rejeitada!(nnot final)")
-            return
+            tape = " "
     ending_node = tester_rec(tape,0,[toes.start],toes)
- #  print(ending_node)
- #  print(len(ending_node))
- #  print(toes.final)      
     if not ending_node:
         resp_label.config(text="Palavra Rejeitada!(indeter)")
     else:
