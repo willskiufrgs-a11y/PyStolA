@@ -373,47 +373,47 @@ class Selected:
 
 # -------------------------------------------------------------- Tester functions
            # Para essas funções, depois seria bom limpar as listas de nodos, checkando se os novos nodos já estão na lista antess de apendelos lá... Claro, tomando cuidado para não ratirar com leituras..
-def transictionFunction(letter: String, n: Node, toe: au_toma_toes) -> list[Node]: 
-    candidate_nodes = []
-    for edge in toe.edges:
+           
+def eClosure(n: Node, toes: au_toma_toes) -> list[Node]:
+    nextNodes = set()
+    for edge in toes.edges:
         if edge.from_state == n:
             if "E" in edge.from_tape:
-                candidate_nodes.append(edge.to_state)
-                candidate_nodes += transictionFunction(letter,edge.to_state,toe)
-            if letter in edge.from_tape:
-                candidate_nodes.append(edge.to_state)
-    return candidate_nodes
+                nextNodes.update({edge.to_state} | set(eClosure(edge.to_state,toes)))
+    return list(nextNodes | {n})
 
-def tinyRec(nodeList: list[Node],toe) -> list[Node]:
-    tmp_list2 = []
-    for node in nodeList:
-        res = transictionFunction(" ",node,toe)
-        if res:
-            tmp_list2 = list(set(tmp_list2) | set(res))
-    if set(tmp_list2) - set(nodeList):
-        return tinyRec(list(set(nodeList) | set(tmp_list2)),toe)
-    else:
-        return nodeList
+def transictionFunction(letter: String, n: Node, toe: au_toma_toes) -> list[Node]: 
+    candidate_nodes = set()
+    for edge in toe.edges:
+        if edge.from_state == n:
+            if letter in edge.from_tape:
+                candidate_nodes.update({edge.to_state})
+    return list(candidate_nodes)
 
 def tester_rec(words: string,tape_head: int, from_states: list[node],toe) -> list[node]:
-    next_nodes = []
+    next_nodes = set()
+    n_trans = set()
     for node in from_states:
-        tmp_list = transictionFunction(words[tape_head],node,toe)
-        if tmp_list:
-            next_nodes += tmp_list
-    if (len(words) > tape_head + 1) and next_nodes:
-        return tester_rec(words,tape_head + 1,next_nodes,toe)
+        n_closure = eClosure(node,toe)
+        for lNode in n_closure:
+            n_trans.update(set(transictionFunction(words[tape_head],lNode,toe)))
+    for nody in n_trans:
+        next_nodes.update(eClosure(nody,toe))
+    if len(words) > tape_head + 1:
+        return tester_rec(words,tape_head + 1,list(next_nodes),toe)
     else:
-        return tinyRec(next_nodes,toe)
+        return list(next_nodes)
 
 def tester(toes,entry,resp_label):
     tape = entry.get()
     if len(tape) == 0:
-        if toes.start in toes.final:
-            resp_label.config(text="Palavra Aceita!")
-            return
-        else:
-            tape = " "
+        for i in eClosure(toes.start,toes):
+            if i in toes.final:
+                resp_label.config(text="Palavra Aceita!")
+                return
+        resp_label.config(text="Palavra Rejeitada!(nnot final)")
+        return
+    
     ending_node = tester_rec(tape,0,[toes.start],toes)
     if not ending_node:
         resp_label.config(text="Palavra Rejeitada!(indeter)")
